@@ -16,8 +16,8 @@
 ---
 
 ## 🚀 Live Demo & Presentation Links
-- 🌐 **Live Web Application (GitHub Pages):** [https://abhijeetbarik.github.io/bereal-generic-medicine/](https://abhijeetbarik.github.io/bereal-generic-medicine/)
-- 💻 **Source Code Repository:** [https://github.com/abhijeetbarik/bereal-generic-medicine](https://github.com/abhijeetbarik/bereal-generic-medicine)
+- 🌐 **Live Web Application (GitHub Pages):** [https://abhi-vyakti.github.io/bereal-generic-medicine/](https://abhi-vyakti.github.io/bereal-generic-medicine/)
+- 💻 **Source Code Repository:** [https://github.com/abhi-vyakti/bereal-generic-medicine](https://github.com/abhi-vyakti/bereal-generic-medicine)
 
 ---
 
