@@ -360,8 +360,19 @@ const PHARMACY_ORDERS = [
   }
 ];
 
+const MEMBERSHIP_PLAN = {
+  id: 'plan-care-plus',
+  name: 'BeReal Care Plus Annual Membership',
+  price: 99,
+  duration: '1 Year (365 Days)',
+  discountPercent: 20,
+  maxDiscountPerOrder: 80,
+  description: 'Annual healthcare savings plan offering 20% discount up to ₹80 on every single order, valid across all delivery corridors in Hyderabad.'
+};
+
 module.exports = {
   MEDICINES,
   ZONES,
-  PHARMACY_ORDERS
+  PHARMACY_ORDERS,
+  MEMBERSHIP_PLAN
 };

@@ -436,6 +436,12 @@
       const [lastPlacedOrder, setLastPlacedOrder] = useState(null);
       const [activeTab, setActiveTab] = useState('catalog');
       
+      // Annual Membership Plan: ₹99 for an entire year (20% discount up to ₹80 on every order)
+      const [hasMembership, setHasMembership] = useState(() => {
+        const saved = localStorage.getItem('bereal_membership');
+        return saved !== null ? JSON.parse(saved) : true;
+      });
+
       // 25-Day Chronic Refill Toggles
       const [refillReminders, setRefillReminders] = useState(() => {
         const saved = localStorage.getItem('bereal_refill_toggles');
@@ -504,12 +510,17 @@
         localStorage.setItem('bereal_refill_toggles', JSON.stringify(refillReminders));
       }, [refillReminders]);
 
+      // Synchronize membership state to localStorage
+      useEffect(() => {
+        localStorage.setItem('bereal_membership', JSON.stringify(hasMembership));
+      }, [hasMembership]);
+
       // Re-trigger Lucide Icons
       useEffect(() => {
         if (window.lucide) {
           window.lucide.createIcons();
         }
-      }, [cart, activeTab, selectedComparison, showRxModal, showQueueModal, showOrderSuccessModal, searchQuery, selectedCategory]);
+      }, [cart, activeTab, selectedComparison, showRxModal, showQueueModal, showOrderSuccessModal, searchQuery, selectedCategory, hasMembership]);
 
       const categories = ['All', 'Diabetes & BP', 'Chronic Care', 'Pain Relief', 'Antibiotics', 'Vitamins'];
 
@@ -527,7 +538,7 @@
         });
       }, [searchQuery, selectedCategory]);
 
-      // Financial Calculation: Cart Totals (100% INR)
+      // Financial Calculation: Cart Totals (100% INR) & Annual Membership Benefit
       const cartCalculations = useMemo(() => {
         let subtotal = 0;
         let totalBrandedEquivalentMrp = 0;
@@ -542,8 +553,13 @@
         });
 
         const deliveryFee = cart.length > 0 ? 50 : 0;
-        const totalPayable = subtotal + deliveryFee;
-        const totalSavings = Math.max(0, totalBrandedEquivalentMrp - subtotal);
+        // Membership Benefit: 20% discount up to ₹80 on every order
+        const membershipDiscount = (hasMembership && subtotal > 0)
+          ? Math.min(80, Math.round(subtotal * 0.20))
+          : 0;
+
+        const totalPayable = Math.max(0, subtotal + deliveryFee - membershipDiscount);
+        const totalSavings = Math.max(0, totalBrandedEquivalentMrp - subtotal) + membershipDiscount;
         const savingsPercentage = totalBrandedEquivalentMrp > 0 
           ? Math.round((totalSavings / totalBrandedEquivalentMrp) * 100) 
           : 0;
@@ -551,13 +567,15 @@
         return {
           subtotal,
           deliveryFee,
+          membershipDiscount,
           totalPayable,
           totalBrandedEquivalentMrp,
           totalSavings,
           savingsPercentage,
-          hasScheduleH
+          hasScheduleH,
+          hasMembership
         };
-      }, [cart]);
+      }, [cart, hasMembership]);
 
       // Cart Actions
       const addToCart = (medicine, generic) => {
@@ -660,13 +678,14 @@
           })),
           subtotal: cartCalculations.subtotal,
           deliveryFee: cartCalculations.deliveryFee,
+          membershipDiscount: cartCalculations.membershipDiscount,
           totalPayable: cartCalculations.totalPayable,
           totalSavings: cartCalculations.totalSavings,
           status: 'Pharmacist Review in Progress',
           prescriptionStatus: uploadedPrescription 
             ? `Verified Rx (#${uploadedPrescription.id || 'RX-ONLINE'})` 
             : 'OTC / Non-Scheduled Verified',
-          pharmacistNotes: `Assigned to ${selectedZone.partnerPharmacy.pharmacistInCharge}. Preparing same-day dispatch.`
+          pharmacistNotes: `Assigned to ${selectedZone.partnerPharmacy.pharmacistInCharge}. ${cartCalculations.membershipDiscount > 0 ? 'BeReal Care Plus Member (20% off up to ₹80 applied). ' : ''}Preparing same-day dispatch.`
         };
 
         setPharmacyOrders(prev => [newOrder, ...prev]);
@@ -755,6 +774,20 @@
                 >
                   <i data-lucide="repeat" className="w-3.5 h-3.5 inline mr-1"></i>
                   Refill & Savings
+                </button>
+
+                {/* Membership Plan Pill Button (₹99/year - 20% off up to ₹80) */}
+                <button 
+                  onClick={() => setHasMembership(prev => !prev)}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center space-x-1.5 shadow-sm ${
+                    hasMembership 
+                      ? 'bg-amber-400 text-amber-950 ring-2 ring-amber-300' 
+                      : 'bg-white/15 text-emerald-100 hover:bg-white/25 border border-white/20'
+                  }`}
+                  title="Toggle BeReal Care Plus Annual Membership: ₹99/yr for 20% discount up to ₹80 on every order"
+                >
+                  <span>⭐</span>
+                  <span>{hasMembership ? 'Care Plus: Active (₹99/yr)' : 'Join Care Plus ₹99/yr'}</span>
                 </button>
 
                 <button 
@@ -1140,6 +1173,19 @@
                           <span className="font-semibold text-gray-900">₹{cartCalculations.deliveryFee}</span>
                         </div>
 
+                        {/* BeReal Care Plus 20% Discount Row (Up to ₹80) */}
+                        {hasMembership && cartCalculations.membershipDiscount > 0 && (
+                          <div className="flex justify-between text-amber-900 bg-amber-50 p-1.5 rounded-lg border border-amber-200 items-center font-medium">
+                            <span className="flex items-center">
+                              ⭐ Care Plus 20% Member Discount:
+                              <span className="ml-1 text-[9px] text-amber-950 bg-amber-200 px-1.5 py-0.2 rounded font-bold">
+                                Max ₹80 Saved
+                              </span>
+                            </span>
+                            <span className="font-extrabold text-amber-900">-₹{cartCalculations.membershipDiscount}</span>
+                          </div>
+                        )}
+
                         {/* Total Payable */}
                         <div className="pt-2 border-t border-dashed border-gray-200 flex justify-between items-baseline">
                           <span className="font-extrabold text-sm text-gray-900">Total Payable:</span>
@@ -1156,6 +1202,44 @@
                             Branded equivalent would have cost ₹{cartCalculations.totalBrandedEquivalentMrp}
                           </div>
                         </div>
+
+                        {/* BeReal Care Plus Membership Plan Box */}
+                        {!hasMembership ? (
+                          <div className="bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200 rounded-xl p-3 text-xs space-y-2 mt-2">
+                            <div className="flex items-center justify-between">
+                              <div className="font-extrabold text-amber-950 flex items-center space-x-1">
+                                <span>⭐</span>
+                                <span>BeReal Care Plus Plan</span>
+                              </div>
+                              <span className="bg-amber-500 text-white text-[10px] font-black px-2 py-0.5 rounded-full shadow-sm">
+                                ₹99 / Year
+                              </span>
+                            </div>
+                            <p className="text-[11px] text-amber-900 leading-tight">
+                              Benefit: <strong>20% discount up to ₹80</strong> on every single order for 365 days!
+                            </p>
+                            <button 
+                              onClick={() => setHasMembership(true)}
+                              className="w-full bg-amber-500 hover:bg-amber-600 text-white font-bold py-1.5 rounded-lg text-xs transition shadow-sm flex items-center justify-center space-x-1"
+                            >
+                              <span>Unlock Plan for ₹99 & Save ₹{Math.min(80, Math.round(cartCalculations.subtotal * 0.20))} Now</span>
+                            </button>
+                          </div>
+                        ) : (
+                          <div className="bg-amber-50/70 border border-amber-200 rounded-xl p-2.5 text-[11px] text-amber-900 flex items-center justify-between mt-2">
+                            <div className="flex items-center space-x-1.5">
+                              <span>⭐</span>
+                              <span><strong>Care Plus Active:</strong> ₹99/yr plan applying 20% off (up to ₹80)</span>
+                            </div>
+                            <button 
+                              onClick={() => setHasMembership(false)}
+                              className="text-[10px] text-gray-500 hover:text-red-600 underline font-medium"
+                              title="Toggle off membership"
+                            >
+                              Pause
+                            </button>
+                          </div>
+                        )}
 
                         {/* Schedule H / Prescription Warning & Status */}
                         {cartCalculations.hasScheduleH && (
@@ -1231,6 +1315,38 @@
             {activeTab === 'dashboard' && (
               <div className="space-y-6">
                 
+                {/* ANNUAL MEMBERSHIP PLAN BANNER (₹99/year - 20% off up to ₹80) */}
+                <div className="bg-gradient-to-r from-amber-600 to-amber-700 text-white rounded-2xl p-6 shadow-md flex flex-wrap items-center justify-between gap-4">
+                  <div className="space-y-1.5 max-w-xl">
+                    <div className="inline-flex items-center space-x-1.5 bg-white/20 backdrop-blur-sm px-3 py-0.5 rounded-full text-xs font-bold text-amber-100">
+                      <span>⭐</span>
+                      <span>BeReal Care Plus Annual Membership</span>
+                    </div>
+                    <h3 className="text-xl font-black">
+                      ₹99 / Year Plan • 20% Discount up to ₹80 on Every Order
+                    </h3>
+                    <p className="text-xs text-amber-100 leading-relaxed font-light">
+                      Designed for families and students managing recurring prescriptions in Hyderabad. Save up to ₹960/year in additional member-only savings on top of standard 40%–70% generic price cuts.
+                    </p>
+                  </div>
+                  <div className="flex items-center space-x-3">
+                    <div className="bg-black/20 backdrop-blur-sm rounded-xl px-4 py-2 text-center">
+                      <span className="text-[10px] uppercase font-semibold text-amber-200 block">Plan Status</span>
+                      <span className="font-black text-sm">{hasMembership ? 'Active (Valid 1 Yr)' : 'Not Active'}</span>
+                    </div>
+                    <button 
+                      onClick={() => setHasMembership(prev => !prev)}
+                      className={`px-4 py-2.5 rounded-xl text-xs font-black transition shadow ${
+                        hasMembership 
+                          ? 'bg-white text-amber-900 hover:bg-amber-50' 
+                          : 'bg-emerald-500 hover:bg-emerald-400 text-white'
+                      }`}
+                    >
+                      {hasMembership ? 'Membership Active ✓' : 'Subscribe for ₹99/yr'}
+                    </button>
+                  </div>
+                </div>
+
                 {/* Header Summary Cards */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div className="bg-white p-5 rounded-2xl border border-emerald-100 shadow-sm">
@@ -1699,6 +1815,12 @@
                     <span>Platform & Delivery Fee:</span>
                     <span className="font-bold text-gray-900">₹{lastPlacedOrder.deliveryFee}</span>
                   </div>
+                  {lastPlacedOrder.membershipDiscount > 0 && (
+                    <div className="flex justify-between text-amber-900 bg-amber-50 p-1.5 rounded-lg border border-amber-200 font-medium">
+                      <span>⭐ Care Plus 20% Discount:</span>
+                      <span className="font-extrabold">-₹{lastPlacedOrder.membershipDiscount}</span>
+                    </div>
+                  )}
                   <div className="pt-2 border-t border-gray-300 flex justify-between font-black text-gray-900 text-sm">
                     <span>Total Paid (INR):</span>
                     <span className="text-bereal-600 text-base">₹{lastPlacedOrder.totalPayable}</span>

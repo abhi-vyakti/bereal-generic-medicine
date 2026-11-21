@@ -7,7 +7,7 @@ app.use(cors());
 app.use(express.json());
 
 // Load Seeded Medicine Catalog & Hyderabad Fulfillment Data
-const { MEDICINES, ZONES, PHARMACY_ORDERS } = require('./data');
+const { MEDICINES, ZONES, PHARMACY_ORDERS, MEMBERSHIP_PLAN } = require('./data');
 
 // 1. Get Medicines (with search and category filtering)
 app.get('/api/medicines', (req, res) => {
@@ -48,9 +48,14 @@ app.get('/api/zones', (req, res) => {
   res.json(ZONES);
 });
 
-// 4. Create Order with Transparent ₹50 Flat Fee
+// 4. Get Annual Membership Plan Details (₹99/year - 20% off up to ₹80)
+app.get('/api/membership', (req, res) => {
+  res.json(MEMBERSHIP_PLAN);
+});
+
+// 5. Create Order with Transparent ₹50 Flat Fee & Membership Discount
 app.post('/api/orders', (req, res) => {
-  const { items, zoneId, customerName, prescriptionAttached, prescriptionNotes } = req.body;
+  const { items, zoneId, customerName, prescriptionAttached, prescriptionNotes, isMember } = req.body;
 
   if (!items || items.length === 0) {
     return res.status(400).json({ error: 'Order must contain at least one item' });
@@ -69,8 +74,13 @@ app.post('/api/orders', (req, res) => {
   });
 
   const deliveryFee = 50; // Transparent Flat Delivery & Verification Fee in INR
-  const totalPayable = subtotal + deliveryFee;
-  const totalSavings = Math.max(0, brandedTotal - subtotal);
+  // BeReal Care Plus Membership benefit: 20% discount up to ₹80 per order
+  const membershipDiscount = (isMember && subtotal > 0) 
+    ? Math.min(MEMBERSHIP_PLAN.maxDiscountPerOrder, Math.round(subtotal * (MEMBERSHIP_PLAN.discountPercent / 100))) 
+    : 0;
+
+  const totalPayable = Math.max(0, subtotal + deliveryFee - membershipDiscount);
+  const totalSavings = Math.max(0, brandedTotal - subtotal) + membershipDiscount;
 
   const newOrder = {
     orderId: `BR-HYD-${Math.floor(1000 + Math.random() * 9000)}`,
@@ -81,20 +91,21 @@ app.post('/api/orders', (req, res) => {
     items,
     subtotal,
     deliveryFee,
+    membershipDiscount,
     totalPayable,
     totalSavings,
     status: 'Pharmacist Review in Progress',
     prescriptionStatus: hasScheduleH 
       ? (prescriptionAttached ? 'Schedule H - Rx Verified' : 'Pending Rx Verification')
       : 'OTC / Schedule G Approved',
-    pharmacistNotes: `Assigned to ${selectedZone.partnerPharmacy.pharmacistInCharge}. Estimated dispatch: ${selectedZone.eta}.`
+    pharmacistNotes: `Assigned to ${selectedZone.partnerPharmacy.pharmacistInCharge}. ${membershipDiscount > 0 ? 'BeReal Care Plus Member (20% off up to ₹80 applied). ' : ''}Estimated dispatch: ${selectedZone.eta}.`
   };
 
   PHARMACY_ORDERS.unshift(newOrder);
   res.status(201).json(newOrder);
 });
 
-// 5. B2B Pharmacy Queue Endpoint for Evaluator Demo
+// 6. B2B Pharmacy Queue Endpoint for Evaluator Demo
 app.get('/api/pharmacy/queue', (req, res) => {
   res.json(PHARMACY_ORDERS);
 });

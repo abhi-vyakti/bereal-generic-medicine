@@ -36,28 +36,36 @@ Over 65% of an Indian family’s out-of-pocket healthcare expenditure is spent o
 ### 1. 100% Indian Rupee (₹) Pricing & Transparent Fee Model
 - Standardized strictly in **INR (₹)** throughout the entire application.
 - Itemized checkout billing:
-  $$\text{Total Payable} = \text{Generic Medicines Subtotal} + ₹50\text{ (Flat Platform \& Local Delivery Fee)}$$
+  $$\text{Total Payable} = \text{Generic Medicines Subtotal} + ₹50\text{ (Flat Platform \& Local Delivery Fee)} - \text{Membership Discount}$$
 - Zero hidden packaging fees or surge pricing.
 - Live **Estimated Monthly Savings Tracker** demonstrating how switching chronic prescriptions saves patients ₹1,100 to ₹1,800 every month.
 
-### 2. Active-Salt Chemical Equivalence Engine
+### 2. BeReal Care Plus Annual Membership Plan (₹99 / Year)
+- **Affordable Annual Subscription:** ₹99 for an entire year (365 days of active healthcare coverage).
+- **Guaranteed Order Savings Benefit:** **20% discount up to ₹80 on every single order**, with no minimum order value restriction.
+- **Interactive Membership Experience:**
+  - One-click toggle in the header navigation and checkout drawer to activate or pause the plan.
+  - Transparent itemized member savings breakdown displayed on cart totals, order confirmation receipts, and the chronic refill dashboard.
+  - Evaluators can test both Member and Non-Member checkout calculations live.
+
+### 3. Active-Salt Chemical Equivalence Engine
 - Search by **branded commercial trade names** (*Panadol*, *Glucophage*, *Augmentin*, *Telma*, *Amlokind*, *Eltroxin*) or **generic chemical salt names** (*Paracetamol 650mg*, *Metformin 500mg*, *Amoxicillin + Clavulanic Acid*, *Telmisartan 40mg*).
 - Filter across critical healthcare categories: *Chronic Care*, *Diabetes & BP*, *Pain Relief*, *Antibiotics*, and *Vitamins*.
 
-### 3. Side-by-Side Lab Verification Matrix
+### 4. Side-by-Side Lab Verification Matrix
 - Direct side-by-side comparison modal between reference branded drugs and generic alternatives.
 - Interactive **3 Quality Assured Badges**:
   - 🛡️ **CDSCO Approved:** Complies with Central Drugs Standard Control Organisation dissolution, purity, and bioavailability norms.
   - 🏭 **WHO-GMP Certified:** Manufactured in certified sterile, Good Manufacturing Practice facilities.
   - 🔬 **Batch & Salt Verified:** Tested for active compound potency ($99.4\% - 100.0\%$ therapeutic bioequivalence).
 
-### 4. Schedule H Prescription Safety Gate
+### 5. Schedule H Prescription Safety Gate
 - Mandatory prescription verification for Schedule H / H1 drugs (antibiotics, cardiac, and diabetic therapies).
 - Interactive **Prescription Selector & Uploader** with 1-click presets:
   - *SNIST Campus Student Care Preset* (Acute Pharyngitis & Seasonal Pyrexia)
   - *Chronic Elderly Patient Preset* (Type 2 Diabetes + Hypertension Maintenance)
 
-### 5. Hyperlocal Hyderabad Fulfillment Corridor
+### 6. Hyperlocal Hyderabad Fulfillment Corridor
 - Dynamic **Delivery Zone Selector**:
   - **Ghatkesar & SNIST Corridor** (Partner: *Sri Sai Medico & Generic Care*, 30-45 mins ETA)
   - **Uppal & Ramanthapur** (Partner: *Uppal Care Generic Hub*, 45-60 mins ETA)
@@ -65,11 +73,11 @@ Over 65% of an Indian family’s out-of-pocket healthcare expenditure is spent o
   - **Tarnaka & OU Corridor** (Partner: *Tarnaka Jan Aushadhi & Verified Pharma*, 40-55 mins ETA)
 - Real-time partner pharmacy licensing display (Drug License number, Pharmacist-in-Charge credentials, and verified live stock count).
 
-### 6. 25-Day Chronic Care Refill Automation
+### 7. 25-Day Chronic Care Refill Automation
 - Chronic illnesses (hypertension, diabetes, hypothyroidism) operate on monthly 30-day medication cycles.
 - Automated **25-Day Refill Alerts** prevent critical dosage skips with 1-click reorder functionality and cumulative rupee savings ledger.
 
-### 7. B2B Local Pharmacy Fulfillment Queue (Evaluator View)
+### 8. B2B Local Pharmacy Fulfillment Queue (Evaluator View)
 - Dedicated modal for faculty evaluators and pharmacy partners showing how incoming orders are received, reviewed by registered pharmacists, cross-checked against batch seals, and dispatched with tamper-proof packaging.
 
 ---
